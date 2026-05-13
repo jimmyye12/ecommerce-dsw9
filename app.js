@@ -1,4 +1,3 @@
-// app.js — reemplaza el Hello World
 require('dotenv').config();
 const express      = require('express');
 const path         = require('path');
@@ -38,7 +37,7 @@ app.use((req, res, next) => {
   res.locals.cartItemCount = req.session.cart.totalQty || 0;
   next();
 });
-
+/*
 app.get('/', (req, res) => {
   res.send(`
     Hello World - Jimmy Ye
@@ -46,7 +45,8 @@ app.get('/', (req, res) => {
     Puerto: ${port} | Entorno: ${process.env.NODE_ENV || 'development'}
   `);
 });
-// app.use('/',         productRoutes);
+*/
+app.use('/',          productRoutes);
 app.use('/cart',     cartRoutes);
 app.use('/checkout', checkoutRoutes);
 
