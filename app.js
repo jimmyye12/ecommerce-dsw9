@@ -11,6 +11,8 @@ const productRoutes  = require('./routes/products');
 const cartRoutes     = require('./routes/cart');
 const checkoutRoutes = require('./routes/checkout');
 const userAuthRoutes = require('./routes/userAuth');
+const storeAdminRoutes = require('./routes/storeAdmin');
+const customerRoutes = require('./routes/customer');
 const app  = express();
 const port = process.env.PORT || 3000;
 
@@ -33,6 +35,7 @@ app.use(session({
   cookie: { maxAge: 3600000 }
 }));
 app.use(attachLocals);
+app.use('/store-admin', storeAdminRoutes);
 
 app.use((req, res, next) => {
   if (!req.session.cart) {
@@ -54,6 +57,8 @@ app.use('/',          productRoutes);
 app.use('/cart',     cartRoutes);
 app.use('/checkout', checkoutRoutes);
 app.use('/user', userAuthRoutes);
+app.use('/store', storeAuthRoutes);
+app.use('/customer', customerRoutes);
 
 app.use((req, res) => {
   res.status(404).render('404', { title: 'Pagina no encontrada' });
@@ -65,7 +70,7 @@ app.use((req, res) => {
   (req, res, next) => { res.locals.layout = false; next(); }
 );
 
-app.use('/store', storeAuthRoutes);
+
 
 sequelize.sync()
   .then(() => {
