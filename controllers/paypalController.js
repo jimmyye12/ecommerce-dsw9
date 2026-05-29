@@ -26,7 +26,6 @@ const showPayout = async (req, res) => {
   });
 };
 
-// controllers/paypalController.js  (2/2) — Procesar payout
 const { sendPayout } = require('../services/paypalService');
 
 // POST /store-admin/payout
