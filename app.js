@@ -5,19 +5,24 @@ const session      = require('express-session');
 const cookieParser = require('cookie-parser');
 const ejsLayouts   = require('express-ejs-layouts');
 const sequelize    = require('./config/database');
-//const { Product, Order, OrderItem } = require('./models');
+const { Product, Order, OrderItem } = require('./models');
 
 const productRoutes  = require('./routes/products');
 const cartRoutes     = require('./routes/cart');
 const checkoutRoutes = require('./routes/checkout');
-const userAuthRoutes = require('./routes/userAuth');
-const storeAdminRoutes = require('./routes/storeAdmin');
-const customerRoutes = require('./routes/customer');
-const app  = express();
-const port = process.env.PORT || 3000;
 
 const storeAuthRoutes = require('./routes/storeAuth');
 const { attachLocals } = require('./middleware/authMiddleware');
+
+const userAuthRoutes = require('./routes/userAuth');
+
+const storeAdminRoutes = require('./routes/storeAdmin');
+
+const customerRoutes = require('./routes/customer');
+
+
+const app  = express();
+const port = process.env.PORT || 3000;
 
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
@@ -34,9 +39,9 @@ app.use(session({
   saveUninitialized: false,
   cookie: { maxAge: 3600000 }
 }));
-app.use(attachLocals);
-app.use('/store-admin', storeAdminRoutes);
 
+app.use(attachLocals);
+// Middleware: carrito vacio en sesion si no existe
 app.use((req, res, next) => {
   if (!req.session.cart) {
     req.session.cart = { items: [], totalQty: 0, totalPrice: 0 };
@@ -44,33 +49,29 @@ app.use((req, res, next) => {
   res.locals.cartItemCount = req.session.cart.totalQty || 0;
   next();
 });
-/*
-app.get('/', (req, res) => {
+app.use(['/store/login', '/store/register',
+         '/user/login',  '/user/register',
+         '/store-admin', '/customer'],
+  (req, res, next) => { res.locals.layout = false; next(); }
+);
+/*app.get('/', (req, res) => {
   res.send(`
-    Hello World - Jimmy Ye
+    Hello World - [REEMPLAZAR POR SU NOMBRE]
     La aplicacion funciona en Render.
     Puerto: ${port} | Entorno: ${process.env.NODE_ENV || 'development'}
   `);
 });
 */
-app.use('/',          productRoutes);
+app.use('/',         productRoutes);
 app.use('/cart',     cartRoutes);
 app.use('/checkout', checkoutRoutes);
-app.use('/user', userAuthRoutes);
 app.use('/store', storeAuthRoutes);
+app.use('/user', userAuthRoutes);
+app.use('/store-admin', storeAdminRoutes);
 app.use('/customer', customerRoutes);
-
 app.use((req, res) => {
   res.status(404).render('404', { title: 'Pagina no encontrada' });
 });
-
- app.use(['/store/login', '/store/register',
-         '/user/login',  '/user/register',
-         '/store-admin', '/customer'],
-  (req, res, next) => { res.locals.layout = false; next(); }
-);
-
-
 
 sequelize.sync()
   .then(() => {
@@ -83,5 +84,3 @@ sequelize.sync()
     console.error('Error al sincronizar BD:', err.message);
     process.exit(1);
   });
-
- 
